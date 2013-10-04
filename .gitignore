@@ -1,3 +1,6 @@
 /away
 /target
 .DS_Store
+/*.iml
+/*.ipr
+/*.iws

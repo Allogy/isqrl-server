@@ -7,6 +7,13 @@
     <packaging>war</packaging>
     <name>isqrl Tapestry 5 Application</name>
         <dependencies>
+
+            <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>javase</artifactId> <!-- or "core"? -->
+                <version>2.2</version>
+            </dependency>
+
         <!-- Too set up an application with a database, change the artifactId below to
              tapestry-hibernate, and add a dependency on your JDBC driver. You'll also
              need to add Hibernate configuration files, such as hibernate.cfg.xml. -->
@@ -138,7 +145,7 @@ of testing facilities designed for use with TestNG (http://testng.org/), so it's
     <properties>
         <tapestry-release-version>5.3.7</tapestry-release-version>
         <servlet-api-release-version>2.5</servlet-api-release-version>
-        <testng-release-version>5.14.10</testng-release-version>
+        <testng-release-version>6.8.5</testng-release-version>
         <easymock-release-version>3.0</easymock-release-version>
     </properties>
 </project>

@@ -1,17 +1,15 @@
 package com.allogy.isqrl.services;
 
-import java.io.IOException;
-
-import org.apache.tapestry5.*;
+import com.allogy.isqrl.helpers.OutputStreamResponse;
+import org.apache.tapestry5.SymbolConstants;
 import org.apache.tapestry5.ioc.MappedConfiguration;
 import org.apache.tapestry5.ioc.OrderedConfiguration;
 import org.apache.tapestry5.ioc.ServiceBinder;
 import org.apache.tapestry5.ioc.annotations.Local;
-import org.apache.tapestry5.services.Request;
-import org.apache.tapestry5.services.RequestFilter;
-import org.apache.tapestry5.services.RequestHandler;
-import org.apache.tapestry5.services.Response;
+import org.apache.tapestry5.services.*;
 import org.slf4j.Logger;
+
+import java.io.IOException;
 
 /**
  * This module is automatically included as part of the Tapestry IoC Registry, it's a good place to
@@ -113,5 +111,17 @@ public class AppModule
         // within the pipeline.
 
         configuration.add("Timing", filter);
+    }
+
+    /**
+     * Adds ComponentEventResultProcessors
+     *
+     * @param configuration the configuration where new ComponentEventResultProcessors are registered by the type they are processing
+     * @param response the response that the event result processor handles
+     * @url http://wiki.apache.org/tapestry/Tapestry5HowToCreateAComponentEventResultProcessor
+     */
+    public void contributeComponentEventResultProcessor(MappedConfiguration<Class<?>, ComponentEventResultProcessor<?>> configuration, Response response)
+    {
+        configuration.add(OutputStreamResponse.class, new OutputStreamResponseResultProcessor(response));
     }
 }

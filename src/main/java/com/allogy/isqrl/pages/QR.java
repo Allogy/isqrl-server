@@ -1,0 +1,97 @@
+package com.allogy.isqrl.pages;
+
+import com.allogy.isqrl.helpers.OutputStreamResponse;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import org.apache.tapestry5.annotations.InjectPage;
+import org.apache.tapestry5.ioc.annotations.Inject;
+import org.apache.tapestry5.services.PageRenderLinkSource;
+import org.apache.tapestry5.services.Response;
+import org.apache.tapestry5.util.TextStreamResponse;
+import org.slf4j.Logger;
+
+import java.io.IOException;
+import java.io.OutputStream;
+
+/**
+ * User: robert
+ * Date: 2013/10/03
+ * Time: 11:36 PM
+ */
+public class QR
+{
+    @Inject
+    private Response response;
+
+    Object onActivate()
+    {
+        response.setStatus(400);
+        return new TextStreamResponse("text/plain", "missing one or more arguments");
+    }
+
+    @InjectPage
+    private Scan scan;
+
+    @Inject
+    private Logger log;
+
+    @Inject
+    private PageRenderLinkSource pageRenderLinkSource;
+
+    Object onActivate(String hashY, String xAndFormat) throws WriterException, IOException
+    {
+        String imageFormat="png";
+        String x=xAndFormat;
+
+        int period=xAndFormat.lastIndexOf('.');
+        if (period > 0 && period < xAndFormat.length())
+        {
+            x=xAndFormat.substring(0, period);
+            String ext=xAndFormat.substring(period+1).toLowerCase();
+
+            if (ext.startsWith("tif"  )) imageFormat="tiff";
+            else if (ext.equals("gif" )) imageFormat="gif";
+            else if (ext.equals("jpg" )) imageFormat="jpeg";
+            else if (ext.equals("jpeg")) imageFormat="jpeg";
+            else if (ext.equals("png" )) imageFormat="png";
+            else
+            {
+                response.setStatus(400);
+                return new TextStreamResponse("text/plain", "unknown or invalid format: "+ext);
+            }
+        }
+
+        scan.withHashYAndX(hashY, x);
+        final String url=pageRenderLinkSource.createPageRenderLink(Scan.class).toAbsoluteURI();
+
+        log.trace("encoding url as QR code: {}", url);
+
+        final String finalImageFormat=imageFormat;
+        final QRCodeWriter qrCodeWriter=new QRCodeWriter();
+        BarcodeFormat barcodeFormat=BarcodeFormat.QR_CODE;
+        int width =150;
+        int height=150;
+        final BitMatrix bitMatrix = qrCodeWriter.encode(url, barcodeFormat, width, height);
+
+        return new OutputStreamResponse()
+        {
+            public String getContentType()
+            {
+                return "image/"+finalImageFormat;
+            }
+
+            public void writeToStream(OutputStream outputStream) throws IOException
+            {
+                MatrixToImageWriter.writeToStream(bitMatrix, finalImageFormat, outputStream);
+            }
+
+            public void prepareResponse(Response response)
+            {
+                //no-op...
+            }
+        };
+    }
+}

@@ -1,8 +1,8 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite name="isqrl Application Test Suite" annotations="1.5">
+<suite name="isqrl Application Test Suite" annotations="1.5" verbose="10">
     <test name="Unit Tests">
         <packages>
-            <package name="com.allogy.isqrl"/>
+            <package name="com.allogy.isqrl.*"/>
         </packages>
     </test>
 </suite>
