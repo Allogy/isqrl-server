@@ -1,53 +1,35 @@
 package com.allogy.isqrl.components;
 
-import org.apache.tapestry5.*;
-import org.apache.tapestry5.annotations.*;
-import org.apache.tapestry5.ioc.annotations.*;
+import org.apache.tapestry5.Binding;
 import org.apache.tapestry5.BindingConstants;
-import org.apache.tapestry5.SymbolConstants;
+import org.apache.tapestry5.ComponentResources;
+import org.apache.tapestry5.annotations.Parameter;
+import org.apache.tapestry5.annotations.Property;
+import org.apache.tapestry5.ioc.annotations.Inject;
+import org.apache.tapestry5.services.BindingSource;
 
 /**
  * Layout component for pages of application isqrl.
  */
-@Import(stylesheet = "context:layout/layout.css")
+//Import(stylesheet = "context:layout/layout.css")
 public class Layout
 {
-    /**
-     * The page title, for the <title> element and the <h1> element.
-     */
+
     @Property
-    @Parameter(required = true, defaultPrefix = BindingConstants.LITERAL)
+    //@Parameter(required = true, defaultPrefix = BindingConstants.MESSAGE)
+    @Parameter
     private String title;
 
-    @Property
-    private String pageName;
-
-    @Property
-    @Parameter(defaultPrefix = BindingConstants.LITERAL)
-    private String sidebarTitle;
-
-    @Property
-    @Parameter(defaultPrefix = BindingConstants.LITERAL)
-    private Block sidebar;
+    @Inject
+    private BindingSource bindingSource;
 
     @Inject
-    private ComponentResources resources;
+    private ComponentResources componentResources;
 
-    @Property
-    @Inject
-    @Symbol(SymbolConstants.APPLICATION_VERSION)
-    private String appVersion;
-
-
-    public String getClassForPageName()
+    Binding defaultTitle()
     {
-        return resources.getPageName().equalsIgnoreCase(pageName)
-                ? "current_page_item"
-                : null;
+        ComponentResources pageResources = componentResources.getPage().getComponentResources();
+        return bindingSource.newBinding("title from subordinate component page class", pageResources, BindingConstants.MESSAGE, "title");
     }
 
-    public String[] getPageNames()
-    {
-        return new String[]{"Index", "About", "Contact"};
-    }
 }
