@@ -31,7 +31,7 @@ public class DomainName
             int secondSlash=referrer.lastIndexOf('/', thirdSlash-1);
             if (secondSlash<=0) return null;
             start=secondSlash;
-            nonUserPasswordColon=referrer.indexOf(':', thirdSlash);
+            nonUserPasswordColon=referrer.indexOf(':', secondSlash);
         }
         else
         {
