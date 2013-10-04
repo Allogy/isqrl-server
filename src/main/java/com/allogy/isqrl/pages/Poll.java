@@ -82,7 +82,7 @@ public class Poll
             String referrer = request.getHeader("Referrer");
             String domainName = DomainName.fromReferrer(referrer);
 
-            log.debug("extract domain from referrer: '{}' -> '{}'", referrer, domainName);
+            log.trace("extract domain from referrer: '{}' -> '{}'", referrer, domainName);
 
             if (domainName==null)
             {
