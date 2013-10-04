@@ -3,6 +3,7 @@ package com.allogy.isqrl.services.impl;
 import com.allogy.isqrl.entities.Blip;
 import com.allogy.isqrl.services.CrossRoads;
 import org.apache.tapestry5.ioc.annotations.Inject;
+import org.apache.tapestry5.ioc.annotations.PostInjection;
 import org.apache.tapestry5.ioc.services.cron.IntervalSchedule;
 import org.apache.tapestry5.ioc.services.cron.PeriodicExecutor;
 import org.slf4j.Logger;
@@ -61,6 +62,7 @@ public class CrossRoadsImpl implements CrossRoads
 
     private static final long STALE_BLIP_TIMEOUT_MS= TimeUnit.SECONDS.toMillis(20);
 
+    @PostInjection
     public
     void serviceStarts(PeriodicExecutor periodicExecutor)
     {
