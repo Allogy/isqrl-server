@@ -5,6 +5,7 @@ import com.allogy.isqrl.helpers.CookieName;
 import com.allogy.isqrl.services.CrossRoads;
 import com.allogy.isqrl.services.ServerSignature;
 import org.apache.tapestry5.annotations.Property;
+import org.apache.tapestry5.ioc.Messages;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.Cookies;
 import org.apache.tapestry5.services.Response;
@@ -111,7 +112,7 @@ public class Scan
 
         String previousHashY=cookies.readCookieValue(CookieName.forDomainTrust(blip.getDomainName()));
 
-        distrustCauses=new ArrayList();
+        distrustCauses=new ArrayList<String>();
 
         if (previousHashY==null)
         {
@@ -169,5 +170,37 @@ public class Scan
     @Property
     private String cause;
 
+    @Inject
+    private Messages messages;
+
+    public
+    String getContinueMessage()
+    {
+        if (distrustCauses.isEmpty())
+        {
+            /*
+            Technically speaking, they have already "sent" the auth (to the auth server), so this is from the users standpoint...
+            Should we "send" it to the originating party? Also, using "send" helps gather the idea that the tokens are stored
+            device-side, which is better prep and understanding for full-SQRL adoption.
+             */
+            return messages.get("send-auth");
+        }
+        else
+        {
+            return messages.get("continue-with-risk");
+        }
+    }
+
+    Object onSelectedFromContinue()
+    {
+        response.setStatus(400);
+        return new TextStreamResponse("text/plain", "continue is not yet implemented");
+    }
+
+    Object onSelectedFromBlacklist()
+    {
+        response.setStatus(400);
+        return new TextStreamResponse("text/plain", "blacklist is not yet implemented");
+    }
 
 }

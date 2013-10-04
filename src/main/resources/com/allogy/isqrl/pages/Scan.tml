@@ -3,7 +3,49 @@
       xmlns:p="tapestry:parameter"
       >
 
-	<div class="domainName">${domainName}</div>
+<style type="text/css">
+.centeringContainer
+{
+	position: relative;
+	width: 100%;
+}
+.domainName
+{
+	display: block;
+
+	font-size: 30px;
+	font-weight: bold;
+	padding: 20px;
+	margin: 20px;
+	border: 2px solid red;
+
+	position: absolute:
+	left: 20px;
+	right: 20px;
+
+	text-align: center;
+}
+.button
+{
+	display:block;
+	margin: 30px auto;
+	padding: 10px;
+
+	border: 1px solid black;
+	background-color: lightgray;
+
+	font-size: 15px;
+	font-weight: bold;
+}
+.blacklist
+{
+	background-color: #ff7f7f;
+}
+</style>
+
+	<div class="centeringContainer">
+		<h2 class="domainName">${blip.domainName}</h2>
+	</div>
 
 <t:if test="distrustCauses.empty">
 	<div class="allClear">${message:all-clear}</div>
@@ -18,5 +60,13 @@
 	</div>
 </p:else>
 </t:if>
+
+	<t:form class="centeringContainer">
+		<t:submit t:id="continue" class="continue button" value="${continueMessage}" />
+
+<t:if test="notCleanlyTrusted">
+		<t:submit t:id="blacklist" class="blacklist button" value="${message:blacklist}" />
+</t:if>
+	</t:form>
 
 </html>

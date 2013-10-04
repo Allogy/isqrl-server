@@ -2,6 +2,8 @@ package com.allogy.isqrl.services;
 
 import com.allogy.isqrl.helpers.OutputStreamResponse;
 import com.allogy.isqrl.services.impl.CrossRoadsImpl;
+import com.allogy.isqrl.services.impl.RandomSourceImpl;
+import com.allogy.isqrl.services.impl.ServerSignatureImpl;
 import org.apache.tapestry5.SymbolConstants;
 import org.apache.tapestry5.ioc.MappedConfiguration;
 import org.apache.tapestry5.ioc.OrderedConfiguration;
@@ -20,7 +22,9 @@ public class AppModule
 {
     public static void bind(ServiceBinder binder)
     {
-        binder.bind(CrossRoads.class, CrossRoadsImpl.class);
+        binder.bind(CrossRoads.class     , CrossRoadsImpl.class     );
+        binder.bind(RandomSource.class   , RandomSourceImpl.class   );
+        binder.bind(ServerSignature.class, ServerSignatureImpl.class);
     }
 
     public static void contributeFactoryDefaults(
