@@ -1,0 +1,22 @@
+<html t:type="layout"
+      xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
+      xmlns:p="tapestry:parameter"
+      >
+
+	<div class="domainName">${domainName}</div>
+
+<t:if test="distrustCauses.empty">
+	<div class="allClear">${message:all-clear}</div>
+<p:else>
+	<div class="issues">
+		<div class="consider">${message:consider}:</div>
+		<ul>
+<t:loop source="distrustCauses" value="cause">
+			<li>${cause}</li>
+</t:loop>
+		</ul>
+	</div>
+</p:else>
+</t:if>
+
+</html>
