@@ -23,7 +23,7 @@ public class Poll
 
     /**
      * This value should be short enough that sane infrastructure would cut the line, nor that the user would notice if a funky web browser held the page open, etc.
-     * This value should be long enough that the TCP/IP & HTTP overhead is small compared to the window of waiting.
+     * This value should be long enough that the TCP/IP & HTTP overhead is small compared to the window of waiting, and that it will easily satisfy the stale blip value in CrossRoads.
      */
     private static final long STANDARD_POLLING_PERIOD_MS = TimeUnit.SECONDS.toMillis(7);
 
