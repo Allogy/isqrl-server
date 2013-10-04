@@ -13,6 +13,8 @@ public final class Blip
     private String voidMessage;
     private String domainName;
 
+    private String hashY;
+
     private String z;
 
     public
@@ -92,4 +94,13 @@ public final class Blip
         return (activityTime<oldestAcceptable);
     }
 
+    public String getHashY()
+    {
+        return hashY;
+    }
+
+    public void setHashY(String hashY)
+    {
+        this.hashY = hashY;
+    }
 }

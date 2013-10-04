@@ -1,6 +1,7 @@
 package com.allogy.isqrl.services;
 
 import com.allogy.isqrl.helpers.OutputStreamResponse;
+import com.allogy.isqrl.services.impl.CrossRoadsImpl;
 import org.apache.tapestry5.SymbolConstants;
 import org.apache.tapestry5.ioc.MappedConfiguration;
 import org.apache.tapestry5.ioc.OrderedConfiguration;
@@ -19,12 +20,7 @@ public class AppModule
 {
     public static void bind(ServiceBinder binder)
     {
-        // binder.bind(MyServiceInterface.class, MyServiceImpl.class);
-
-        // Make bind() calls on the binder object to define most IoC services.
-        // Use service builder methods (example below) when the implementation
-        // is provided inline, or requires more initialization than simply
-        // invoking the constructor.
+        binder.bind(CrossRoads.class, CrossRoadsImpl.class);
     }
 
     public static void contributeFactoryDefaults(

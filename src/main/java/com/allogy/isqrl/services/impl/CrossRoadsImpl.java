@@ -43,6 +43,7 @@ public class CrossRoadsImpl implements CrossRoads
             }
         }
 
+        blip.setActivityTime(System.currentTimeMillis());
         return blip;
     }
 
