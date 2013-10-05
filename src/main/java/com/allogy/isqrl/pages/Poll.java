@@ -20,6 +20,7 @@ public class Poll
 {
     private static final boolean LOW_MEMORY_MODE = Boolean.getBoolean("LOW_MEMORY_MODE");
     private static final long NO_THRASHING_DELAY_MS = TimeUnit.SECONDS.toMillis(4);
+    private static final boolean ISQRL_DOWN=Boolean.getBoolean("ISQRL_DOWN") || "true".equals(System.getenv("ISQRL_DOWN"));
 
     /**
      * This value should be short enough that sane infrastructure would cut the line, nor that the user would notice if a funky web browser held the page open, etc.
@@ -55,6 +56,13 @@ public class Poll
 
     Object onActivate(String hashY, String x) throws InterruptedException
     {
+        if (ISQRL_DOWN)
+        {
+            //no sleep (consumes threads, which is probably what we are lacking in a down situation)
+            response.setStatus(500);
+            return new TextStreamResponse("text/plain", "iSQRL temporarily down");
+        }
+
         this.hashY=hashY;
         this.x=x;
 
