@@ -141,7 +141,8 @@ public class ServerSignatureImpl implements ServerSignature
     String randomButMemorableString()
     {
         Random random=randomSource.get();
-        return randomString(random, 3)+"-"+randomString(random, 4);
+        int first=random.nextInt(5)+1;
+        return randomString(random, first)+"-"+randomString(random, 6-first);
     }
 
     public
