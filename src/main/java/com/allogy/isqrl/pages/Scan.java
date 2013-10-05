@@ -15,9 +15,11 @@ import org.apache.tapestry5.services.Cookies;
 import org.apache.tapestry5.services.Request;
 import org.apache.tapestry5.services.Response;
 import org.apache.tapestry5.util.TextStreamResponse;
+import org.slf4j.Logger;
 
 import javax.servlet.http.Cookie;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -124,10 +126,9 @@ public class Scan
             return new TextStreamResponse("text/plain", "invalid authentication ticket, or slow-auth-server race condition");
         }
 
-        //TODO: I think this same logic is needed in the event handler!
         if (blip.getZ()!=null && !blip.isVoided())
         {
-            blip.setVoidMessage("sorry, this qr code has been scanned by someone else");
+            blip.setVoidMessage("It looks like somebody else may have seen this qr code, if you hit the back button... then maybe it was you?!?!?!");
         }
 
         String previousHashY=cookies.readCookieValue(CookieName.forDomainTrust(blip.getDomainName()));
@@ -163,7 +164,7 @@ public class Scan
 
         if (blip.isVoided())
         {
-            distrustCauses.add("Their chosen authentication mechanisms handed you a voided authentication ticket.");
+            distrustCauses.add("Their chosen authentication mechanisms handed you a voided authentication ticket: "+blip.getVoidMessage());
         }
 
         //TODO: if this project is long-lived, all the above distrust causes should be offloaded to the message system (for localization)
@@ -180,8 +181,16 @@ public class Scan
     public
     String getCookieCount()
     {
-        int n=cookieSource.getCookies().length;
-        return messages.format("cookie-count", n);
+        Cookie[] cookies=cookieSource.getCookies();
+        if (cookies==null)
+        {
+            return messages.get("no-cookies");
+        }
+        else
+        {
+            int n=cookieSource.getCookies().length;
+            return messages.format("cookie-count", n);
+        }
     }
 
     private
@@ -222,9 +231,28 @@ public class Scan
     }
 
     public
+    int getNumDistrustCauses()
+    {
+        return distrustCauses.size();
+    }
+
+    public
     boolean isNotCleanlyTrusted()
     {
         return !distrustCauses.isEmpty();
+    }
+
+    public
+    String getTrueBlue()
+    {
+        if (distrustCauses.isEmpty())
+        {
+            return "blue";
+        }
+        else
+        {
+            return "red";
+        }
     }
 
     @Property
@@ -251,16 +279,82 @@ public class Scan
         }
     }
 
-    Object onSelectedFromContinue()
-    {
-        response.setStatus(400);
-        return new TextStreamResponse("text/plain", "continue is not yet implemented");
-    }
-
     Object onSelectedFromBlacklist()
     {
-        response.setStatus(400);
-        return new TextStreamResponse("text/plain", "blacklist is not yet implemented");
+        /*
+        We blacklist only the domain gathered by the referrer field, b/c it is much harder
+        to spoof than the effectively-user-provided cookieFilteringPath...
+        --
+        Said another way, if a user determines "that's not example.com!"... do we ban "example.com"? :)
+        --
+        TODO: IMO it would be better to ban the root domain (and warn all subs), not a specific subdomain (they are then free to use any other subdomain).
+         */
+        String domainName=blip.getDomainName();
+        String cookieName=CookieName.forDomainTrust(domainName);
+        String cookieValue=messages.format("blacklisted-on", new Date());
+        setPathLimitedCookie(cookieName, cookieValue);
+
+        return Done.class;
+    }
+
+    @Inject
+    private Logger log;
+
+    Object onSelectedFromContinue()
+    {
+        int oldNumDistrustCauses=Integer.parseInt(request.getParameter("numDistrustCauses"));
+
+        if (blip.isVoided())
+        {
+            response.setStatus(400);
+            return new TextStreamResponse("text/plain", messages.format("blip-voided", blip.getVoidMessage()));
+        }
+
+        //Buggy??? I have seen this logic activate when using server secrets with high-byte characters.
+        if (distrustCauses.size()!=oldNumDistrustCauses)
+        {
+            response.setStatus(400);
+            return new TextStreamResponse("text/plain", messages.format("race-then-now", oldNumDistrustCauses, distrustCauses.size()));
+        }
+
+        String domainName=blip.getDomainName(); //???: or... cookieFilteringDomain ???? When are they not equal?
+        String zCookieName=CookieName.forZValue(domainName, USER_NUMBER);
+        String signedZ=cookies.readCookieValue(zCookieName);
+        String z;
+
+        if (signedZ==null)
+        {
+            log.trace("generating signed z value cookie");
+            z=serverSignature.randomLongishString();
+            signedZ=serverSignature.prependSignature(z);
+        }
+        else
+        {
+            /*
+            NOTICE: We do *NOT* verify the z signature *HERE* because it was checked on activation,
+                    (both the page render & this request) and if it IS invalid, then it was already
+                    lumped into the "distrustCauses" that were fully disclosed to the user before
+                    they hit the continue button...
+             */
+            z=serverSignature.removePrependedSignature(signedZ);
+            //???: Do we really need to reset cookie for longevity or changed server id?
+            signedZ=serverSignature.prependSignature(z);
+        }
+
+        synchronized (blip)
+        {
+            blip.setZ(z);
+            blip.notifyAll();
+        }
+
+        String hashY=blip.getHashY(); //???: or... this.hashY ???? When are they not equal?
+
+        String trustCookieName=CookieName.forDomainTrust(domainName);
+
+        setPathLimitedCookie(trustCookieName, hashY);
+        setPathLimitedCookie(zCookieName, signedZ);
+
+        return Done.class;
     }
 
 }

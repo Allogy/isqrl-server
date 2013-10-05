@@ -17,13 +17,20 @@
 	font-weight: bold;
 	padding: 20px;
 	margin: 20px;
-	border: 2px solid red;
 
 	position: absolute:
 	left: 20px;
 	right: 20px;
 
 	text-align: center;
+}
+.blue
+{
+	border: 2px solid blue;
+}
+.red
+{
+	border: 2px solid red;
 }
 .button
 {
@@ -50,7 +57,7 @@
 </style>
 
 	<div class="centeringContainer">
-		<h2 class="domainName">${blip.domainName}</h2>
+		<h2 class="domainName ${trueBlue}">${blip.domainName}</h2>
 	</div>
 
 <t:if test="distrustCauses.empty">
@@ -68,7 +75,11 @@
 </t:if>
 
 	<t:form class="centeringContainer">
+		<input type="hidden" name="numDistrustCauses" value="${numDistrustCauses}"/>
+
+<t:unless test="blip.voided">
 		<t:submit t:id="continue" class="continue button" value="${continueMessage}" />
+</t:unless>
 
 <t:if test="notCleanlyTrusted">
 		<t:submit t:id="blacklist" class="blacklist button" value="${message:blacklist}" />

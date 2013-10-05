@@ -2,6 +2,7 @@ package com.allogy.isqrl.services.impl;
 
 import com.allogy.isqrl.services.RandomSource;
 import com.allogy.isqrl.services.ServerSignature;
+import org.apache.tapestry5.ioc.annotations.EagerLoad;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.ioc.annotations.PostInjection;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import java.util.Random;
  * Date: 2013/10/04
  * Time: 3:24 PM
  */
+@EagerLoad
 public class ServerSignatureImpl implements ServerSignature
 {
 
@@ -55,7 +57,7 @@ public class ServerSignatureImpl implements ServerSignature
             Thread.sleep(2000);
             secret=randomLongishString();
 
-            log.error("Since one was not configured, we have generated a ISQRL_SERVER_SECRET for you... but you will probably want to save this somewhere: {}", secret);
+            log.error("was not configured, so we have generated a ISQRL_SERVER_SECRET for you... but you will probably want to save this somewhere: {}", secret);
         }
 
         if (secret.indexOf(':')>=0)
@@ -98,18 +100,18 @@ public class ServerSignatureImpl implements ServerSignature
         {
             int i=random.nextInt(range);
             char c;
-            if (i>10+26)
+            if (i>=10+26)
             {
-                c=(char)('A'+(i-10+26));
+                c=(char)('A'+(i-(10+26)));
             }
             else
-            if (i>10)
+            if (i>=10)
             {
                 c=(char)('a'+(i-10));
             }
             else
             {
-                c=(char)('0'+(i-10));
+                c=(char)('0'+(i));
             }
             sb.append(c);
         }
@@ -128,7 +130,9 @@ public class ServerSignatureImpl implements ServerSignature
     boolean prependedSignatureMatches(String signedZ)
     {
         String z=removePrependedSignature(signedZ);
+        log.debug("strip: {} -> {}", signedZ, z);
         String expectedSignature=sha1HexOf(superSecretServerKeyThatShouldNeverBeLeakedOrChanged+z);
+        log.debug("match? expecting '{}' as a prefix to '{}'", expectedSignature, signedZ);
         return signedZ.startsWith(expectedSignature);
     }
 
