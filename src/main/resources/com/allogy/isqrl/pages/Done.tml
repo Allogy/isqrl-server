@@ -1,0 +1,21 @@
+<html t:type="layout"
+      xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
+      xmlns:p="tapestry:parameter"
+      >
+
+<style type="text/css">
+.thanks,
+.see-grc,
+.on-your-phone
+{
+	margin: 20px;
+}
+</style>
+
+	<div class="thanks">${message:thanks}</div>
+	<hr/>
+	<div class="on-your-phone">${message:on-your-phone}</div>
+	<hr/>
+	<div class="see-grc">${message:see-grc}</div>
+
+</html>
