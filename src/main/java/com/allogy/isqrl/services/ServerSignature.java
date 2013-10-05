@@ -16,4 +16,8 @@ public interface ServerSignature
     boolean prependedSignatureMatches(String signedZ);
 
     String removePrependedSignature(String signedZ);
+
+    boolean hashOfYMatchesHashY(String y, String hashY);
+
+    String sha1HexOf(String input);
 }

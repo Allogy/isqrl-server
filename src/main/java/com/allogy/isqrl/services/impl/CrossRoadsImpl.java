@@ -51,7 +51,7 @@ public class CrossRoadsImpl implements CrossRoads
     public
     void remove(Blip blip)
     {
-        map.remove(blip);
+        map.remove(blip.getX());
     }
 
     public

@@ -44,6 +44,11 @@ public final class Blip
         }
     }
 
+    public String getX()
+    {
+        return x;
+    }
+
     public String getZ()
     {
         return z;

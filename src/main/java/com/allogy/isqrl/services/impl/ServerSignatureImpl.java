@@ -73,7 +73,7 @@ public class ServerSignatureImpl implements ServerSignature
         superSecretServerKeyThatShouldNeverBeLeakedOrChanged=secret;
     }
 
-    private
+    public
     String sha1HexOf(String input)
     {
         try {
@@ -148,9 +148,11 @@ public class ServerSignatureImpl implements ServerSignature
     boolean prependedSignatureMatches(String signedZ)
     {
         String z=removePrependedSignature(signedZ);
-        log.debug("strip: {} -> {}", signedZ, z);
+        log.trace("strip: {} -> {}", signedZ, z);
+
         String expectedSignature=sha1HexOf(superSecretServerKeyThatShouldNeverBeLeakedOrChanged+z);
-        log.debug("match? expecting '{}' as a prefix to '{}'", expectedSignature, signedZ);
+        log.trace("match? expecting '{}' as a prefix to '{}'", expectedSignature, signedZ);
+
         return signedZ.startsWith(expectedSignature);
     }
 
@@ -168,4 +170,12 @@ public class ServerSignatureImpl implements ServerSignature
             return signedZ.substring(colon+1);
         }
     }
+
+    public
+    boolean hashOfYMatchesHashY(String y, String hashY)
+    {
+        String computedHashY=sha1HexOf(y);
+        return computedHashY.equals(hashY);
+    }
+
 }
