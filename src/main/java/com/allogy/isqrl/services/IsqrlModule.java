@@ -20,7 +20,7 @@ import java.io.IOException;
  */
 public class IsqrlModule
 {
-    public static final String VERSION="0.2";
+    public static final String VERSION="0.2-SNAPSHOT";
 
     public static void bind(ServiceBinder binder)
     {
