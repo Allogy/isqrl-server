@@ -18,8 +18,10 @@ import java.io.IOException;
  * This module is automatically included as part of the Tapestry IoC Registry, it's a good place to
  * configure and extend Tapestry, or to place your own service definitions.
  */
-public class AppModule
+public class IsqrlModule
 {
+    public static final String VERSION="UNAVAILABLE";
+
     public static void bind(ServiceBinder binder)
     {
         binder.bind(CrossRoads.class     , CrossRoadsImpl.class     );
@@ -36,7 +38,7 @@ public class AppModule
         // change, to force the browser to download new versions. This overrides Tapesty's default
         // (a random hexadecimal number), but may be further overriden by DevelopmentModule or
         // QaModule.
-        configuration.override(SymbolConstants.APPLICATION_VERSION, "0.1-SNAPSHOT");
+        configuration.override(SymbolConstants.APPLICATION_VERSION, VERSION);
     }
 
     public static void contributeApplicationDefaults(
