@@ -28,4 +28,9 @@ public class CookieName
 
     private CookieName() {}
 
+    public static
+    String globalSpoofDetector()
+    {
+        return "isqrl:unspoofed";
+    }
 }

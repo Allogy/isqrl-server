@@ -52,6 +52,11 @@ public class ServerSignatureImpl implements ServerSignature
 
         if (secret==null)
         {
+            secret=System.getenv("ISQRL_SERVER_SECRET");
+        }
+
+        if (secret==null)
+        {
             log.warn("ISQRL_SERVER_SECRET is not defined, the service will now generate one for you, but if the service ever restarts all clients will get an ugly warning, so I hope this is not a production instance...");
 
             Thread.sleep(2000);
@@ -93,10 +98,16 @@ public class ServerSignatureImpl implements ServerSignature
     String randomLongishString()
     {
         Random random=randomSource.get();
+        return randomString(random, 20+random.nextInt(20));
+    }
+
+    private
+    String randomString(Random random, int length)
+    {
         StringBuilder sb=new StringBuilder();
 
         int range=10+26+26;
-        for (int n=20+random.nextInt(20); n>=0; n--)
+        for (int n=length; n>0; n--)
         {
             int i=random.nextInt(range);
             char c;
@@ -124,6 +135,13 @@ public class ServerSignatureImpl implements ServerSignature
     {
         String signature=sha1HexOf(superSecretServerKeyThatShouldNeverBeLeakedOrChanged+z);
         return signature+":"+z;
+    }
+
+    public
+    String randomButMemorableString()
+    {
+        Random random=randomSource.get();
+        return randomString(random, 3)+"-"+randomString(random, 4);
     }
 
     public

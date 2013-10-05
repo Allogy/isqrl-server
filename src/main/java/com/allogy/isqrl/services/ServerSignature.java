@@ -9,6 +9,8 @@ public interface ServerSignature
 {
     String prependSignature(String z);
 
+    String randomButMemorableString();
+
     String randomLongishString();
 
     boolean prependedSignatureMatches(String signedZ);

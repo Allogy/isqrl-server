@@ -48,6 +48,7 @@
 {
 	background-color: #ff7f7f;
 }
+.pusd,
 .cookieCount
 {
 	color: gray;
@@ -89,5 +90,5 @@
 	<br/>
 	<br/>
 	<div class="cookieCount">${cookieCount}</div>
-
+	<div class="pusd">${possiblyUselessSpoofDetector}</div>
 </html>

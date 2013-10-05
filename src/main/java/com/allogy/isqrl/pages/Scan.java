@@ -221,6 +221,19 @@ public class Scan
         this.x=x;
     }
 
+    public
+    String getPossiblyUselessSpoofDetector()
+    {
+        String cookieName=CookieName.globalSpoofDetector();
+        String value=cookies.readCookieValue(cookieName);
+        if (value==null)
+        {
+            value=serverSignature.randomButMemorableString();
+            cookies.writeCookieValue(cookieName, value, LONG_COOKIE_LIFETIME);
+        }
+        return value;
+    }
+
     String[] onPassivate()
     {
         return new String[]{
