@@ -6,7 +6,10 @@ import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import org.apache.tapestry5.Asset;
+import org.apache.tapestry5.StreamResponse;
 import org.apache.tapestry5.annotations.InjectPage;
+import org.apache.tapestry5.annotations.Path;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.PageRenderLinkSource;
 import org.apache.tapestry5.services.Response;
@@ -14,6 +17,7 @@ import org.apache.tapestry5.util.TextStreamResponse;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
@@ -23,7 +27,8 @@ import java.io.OutputStream;
  */
 public class QR
 {
-    @Inject
+    private static final boolean QR_GENERATION_DOWN=Boolean.getBoolean("ISQRL_DOWN") || "true".equals(System.getenv("ISQRL_DOWN"));
+
     private Response response;
 
     Object onActivate()
@@ -41,8 +46,30 @@ public class QR
     @Inject
     private PageRenderLinkSource pageRenderLinkSource;
 
+    @Inject
+    @Path("context:qr-down.png")
+    private Asset qrDownImage;
+
     Object onActivate(String domainName, String hashY, String xAndFormat) throws WriterException, IOException
     {
+        if (QR_GENERATION_DOWN) return new StreamResponse()
+        {
+            public String getContentType()
+            {
+                return "image/png";
+            }
+
+            public InputStream getStream() throws IOException
+            {
+                return qrDownImage.getResource().openStream();
+            }
+
+            public void prepareResponse(Response response)
+            {
+                //You might think that we could ask them to cache it a while... but it won't help b/c the url changes constantly (it includes "x").
+            }
+        };
+
         String imageFormat="png";
         String x=xAndFormat;
 
