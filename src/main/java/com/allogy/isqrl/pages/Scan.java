@@ -4,15 +4,22 @@ import com.allogy.isqrl.entities.Blip;
 import com.allogy.isqrl.helpers.CookieName;
 import com.allogy.isqrl.services.CrossRoads;
 import com.allogy.isqrl.services.ServerSignature;
+import org.apache.tapestry5.SymbolConstants;
 import org.apache.tapestry5.annotations.Property;
+import org.apache.tapestry5.internal.services.CookieSink;
+import org.apache.tapestry5.internal.services.CookieSource;
 import org.apache.tapestry5.ioc.Messages;
 import org.apache.tapestry5.ioc.annotations.Inject;
+import org.apache.tapestry5.ioc.annotations.Symbol;
 import org.apache.tapestry5.services.Cookies;
+import org.apache.tapestry5.services.Request;
 import org.apache.tapestry5.services.Response;
 import org.apache.tapestry5.util.TextStreamResponse;
 
+import javax.servlet.http.Cookie;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * User: robert
@@ -25,9 +32,13 @@ public class Scan
      * In case we decide to build out "multiple user accounts" later.
      */
     private static final int USER_NUMBER = 0;
+    private static final int LONG_COOKIE_LIFETIME = (int) TimeUnit.DAYS.toSeconds(365 * 10);
 
     @Inject
     private Cookies cookies;
+
+    @Inject
+    private Request request;
 
     @Inject
     private Response response;
@@ -43,7 +54,7 @@ public class Scan
 
     Object onActivate()
     {
-        if (hashY==null || x==null)
+        if (cookieFilteringDomain==null || hashY==null || x==null)
         {
             response.setStatus(400);
             return new TextStreamResponse("text/plain", "missing one or more arguments");
@@ -52,16 +63,25 @@ public class Scan
         return null;
     }
 
+    private String cookieFilteringDomain;
     private String hashY;
     private String x;
 
     @Property
     private List<String> distrustCauses;
 
-    Object onActivate(String hashY, String x)
+    Object onActivate(String cookieFilteringDomain, String hashY, String x)
     {
+        this.cookieFilteringDomain=cookieFilteringDomain;
         this.hashY=hashY;
         this.x=x;
+
+        /*
+        "cookieFilteringDomain" must be the first parameter (and is added so that) we can restrict the
+        set of cookies we receive from the client. This is important so that we don't get a million
+        cookies sent for "all the sites you visit" for every request. That would be a huge scalability
+        issue.
+         */
 
         this.blip=crossRoads.getOrCreateBlip(x);
 
@@ -79,7 +99,7 @@ public class Scan
         }
 
         /*
-        Wait for up to two seconds for the domain name to come in.
+        Wait for up to two seconds for the blip's domain name to come in.
         NB: it *SHOULD* have already arrived a long time ago, so this may be a bit pedantic.
         * /
         synchronized (blip)
@@ -124,6 +144,11 @@ public class Scan
             distrustCauses.add("The sites identity seems to have changed; it was '"+previousHashY+"', but is now '"+hashY+"'.");
         }
 
+        if (!blip.getDomainName().equals(cookieFilteringDomain))
+        {
+            distrustCauses.add("The site may not be configured correctly (or be spoofed), as the domain names do not match. The QR code says '"+cookieFilteringDomain+"', but the backend says '"+blip.getDomainName()+"'.");
+        }
+
         String signedZCookie=cookies.readCookieValue(CookieName.forZValue(blip.getDomainName(), USER_NUMBER));
 
         if (signedZCookie==null)
@@ -146,9 +171,43 @@ public class Scan
         return null;
     }
 
+    @Inject
+    private CookieSink cookieSink;
+
+    @Inject
+    private CookieSource cookieSource;
+
     public
-    void withHashYAndX(String hashY, String x)
+    String getCookieCount()
     {
+        int n=cookieSource.getCookies().length;
+        return messages.format("cookie-count", n);
+    }
+
+    private
+    void setPathLimitedCookie(String name, String value)
+    {
+        String path=request.getContextPath()+"/scan/"+cookieFilteringDomain+"/";
+
+        //cookies.writeDomainCookieValue(name, value, path, domain, LONG_COOKIE_LIFETIME); ???
+        //We have to compose the cookie ourself or else we could change the symbol: "tapestry.default-cookie-max-age"
+
+        Cookie cookie=new Cookie(name, value);
+        cookie.setPath(path);
+        cookie.setSecure(productionMode);
+        cookie.setMaxAge(LONG_COOKIE_LIFETIME);
+
+        cookieSink.addCookie(cookie);
+    }
+
+    @Inject
+    @Symbol(SymbolConstants.PRODUCTION_MODE)
+    private boolean productionMode;
+
+    public
+    void withDomainHashYAndX(String domain, String hashY, String x)
+    {
+        this.cookieFilteringDomain=domain;
         this.hashY=hashY;
         this.x=x;
     }
@@ -156,6 +215,7 @@ public class Scan
     String[] onPassivate()
     {
         return new String[]{
+                cookieFilteringDomain,
                 hashY,
                 x
         };

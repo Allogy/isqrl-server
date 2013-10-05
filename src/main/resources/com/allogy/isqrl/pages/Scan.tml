@@ -41,6 +41,12 @@
 {
 	background-color: #ff7f7f;
 }
+.cookieCount
+{
+	color: gray;
+	text-align: center;
+	width: 100%;
+}
 </style>
 
 	<div class="centeringContainer">
@@ -68,5 +74,9 @@
 		<t:submit t:id="blacklist" class="blacklist button" value="${message:blacklist}" />
 </t:if>
 	</t:form>
+
+	<br/>
+	<br/>
+	<div class="cookieCount">${cookieCount}</div>
 
 </html>

@@ -41,7 +41,7 @@ public class QR
     @Inject
     private PageRenderLinkSource pageRenderLinkSource;
 
-    Object onActivate(String hashY, String xAndFormat) throws WriterException, IOException
+    Object onActivate(String domainName, String hashY, String xAndFormat) throws WriterException, IOException
     {
         String imageFormat="png";
         String x=xAndFormat;
@@ -64,7 +64,7 @@ public class QR
             }
         }
 
-        scan.withHashYAndX(hashY, x);
+        scan.withDomainHashYAndX(domainName, hashY, x);
         final String url=pageRenderLinkSource.createPageRenderLink(Scan.class).toAbsoluteURI();
 
         log.trace("encoding url as QR code: {}", url);
