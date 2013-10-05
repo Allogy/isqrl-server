@@ -76,6 +76,7 @@
 </t:if>
 
 	<t:form class="centeringContainer">
+		<input type="hidden" name="z" value="${unvalidatedZValue}"/>
 		<input type="hidden" name="numDistrustCauses" value="${numDistrustCauses}"/>
 
 <t:unless test="blip.voided">

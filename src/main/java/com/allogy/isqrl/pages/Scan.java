@@ -72,6 +72,8 @@ public class Scan
     @Property
     private List<String> distrustCauses;
 
+    private int numPostSensitiveDistrustCauses;
+
     Object onActivate(String cookieFilteringDomain, String hashY, String x)
     {
         this.cookieFilteringDomain=cookieFilteringDomain;
@@ -114,6 +116,10 @@ public class Scan
         }
         */
 
+        //NB: the post-side of the equation needs a little help, as it is not fed any of the yummy cookies. So we must account for
+        boolean isPostRequest=request.getMethod().equals("POST");
+        numPostSensitiveDistrustCauses=0;
+
         if (blip.getDomainName()==null)
         {
             if (!blip.isVoided())
@@ -137,7 +143,11 @@ public class Scan
 
         if (previousHashY==null)
         {
-            distrustCauses.add("You have not previously authenticated to this domain name.");
+            if (!isPostRequest)
+            {
+                distrustCauses.add("You have not previously authenticated to this domain name.");
+                numPostSensitiveDistrustCauses++;
+            }
         }
         else
         if (!previousHashY.equals(hashY))
@@ -154,7 +164,11 @@ public class Scan
 
         if (signedZCookie==null)
         {
-            distrustCauses.add("No matching identity (on this device) was found, so you may be *creating* a new account (or hooking up with an existing one).");
+            if (!isPostRequest)
+            {
+                distrustCauses.add("No matching identity (on this device) was found, so you may be *creating* a new account (or hooking up with an existing one).");
+                numPostSensitiveDistrustCauses++;
+            }
         }
         else
         if (!serverSignature.prependedSignatureMatches(signedZCookie))
@@ -246,7 +260,7 @@ public class Scan
     public
     int getNumDistrustCauses()
     {
-        return distrustCauses.size();
+        return distrustCauses.size()-numPostSensitiveDistrustCauses;
     }
 
     public
@@ -310,11 +324,30 @@ public class Scan
         return Done.class;
     }
 
+    public
+    String getUnvalidatedZValue()
+    {
+        String domainName=blip.getDomainName(); //???: or... cookieFilteringDomain ???? When are they not equal?
+        String zCookieName=CookieName.forZValue(domainName, USER_NUMBER);
+        String signedZ=cookies.readCookieValue(zCookieName);
+
+        if (signedZ==null)
+        {
+            //TODO: should we replace server-side Z generation with a javascript (client-side) generator? what is the cost/benefit?
+            return serverSignature.randomLongishString();
+        }
+        else
+        {
+            return serverSignature.removePrependedSignature(signedZ);
+        }
+    }
+
     @Inject
     private Logger log;
 
     Object onSelectedFromContinue()
     {
+        String z=request.getParameter("z");
         int oldNumDistrustCauses=Integer.parseInt(request.getParameter("numDistrustCauses"));
 
         if (blip.isVoided())
@@ -323,36 +356,25 @@ public class Scan
             return new TextStreamResponse("text/plain", messages.format("blip-voided", blip.getVoidMessage()));
         }
 
-        //Buggy??? I have seen this logic activate when using server secrets with high-byte characters.
-        if (distrustCauses.size()!=oldNumDistrustCauses)
+        //TODO: in some cases, we may not be able to guard against a race condition.
+        //What are they going to do? Delete the cookie between the rendered page and posted values? I think we are safe.
+        if (distrustCauses.size()>oldNumDistrustCauses)
         {
+            if (log.isDebugEnabled())
+            {
+                log.info("The following are the new set of distrustCauses...");
+                for (String s : distrustCauses) {
+                    log.debug(s);
+                }
+            }
+
             response.setStatus(400);
             return new TextStreamResponse("text/plain", messages.format("race-then-now", oldNumDistrustCauses, distrustCauses.size()));
         }
 
         String domainName=blip.getDomainName(); //???: or... cookieFilteringDomain ???? When are they not equal?
         String zCookieName=CookieName.forZValue(domainName, USER_NUMBER);
-        String signedZ=cookies.readCookieValue(zCookieName);
-        String z;
-
-        if (signedZ==null)
-        {
-            log.trace("generating signed z value cookie");
-            z=serverSignature.randomLongishString();
-            signedZ=serverSignature.prependSignature(z);
-        }
-        else
-        {
-            /*
-            NOTICE: We do *NOT* verify the z signature *HERE* because it was checked on activation,
-                    (both the page render & this request) and if it IS invalid, then it was already
-                    lumped into the "distrustCauses" that were fully disclosed to the user before
-                    they hit the continue button...
-             */
-            z=serverSignature.removePrependedSignature(signedZ);
-            //???: Do we really need to reset cookie for longevity or changed server id?
-            signedZ=serverSignature.prependSignature(z);
-        }
+        String signedZ=serverSignature.prependSignature(z);
 
         synchronized (blip)
         {
