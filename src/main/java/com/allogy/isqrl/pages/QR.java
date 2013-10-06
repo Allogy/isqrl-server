@@ -92,7 +92,10 @@ public class QR
         }
 
         scan.withDomainHashYAndX(domainName, hashY, x);
-        final String url=pageRenderLinkSource.createPageRenderLink(Scan.class).toAbsoluteURI();
+        String url=pageRenderLinkSource.createPageRenderLink(Scan.class).toAbsoluteURI();
+
+        //BUG: not sure why the port number is leaking into the url here...
+        url=url.replaceAll(":443/", "/");
 
         log.trace("encoding url as QR code: {}", url);
 
