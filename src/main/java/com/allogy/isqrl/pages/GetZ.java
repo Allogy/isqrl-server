@@ -38,10 +38,16 @@ public class GetZ
         String x=request.getParameter("x");
         String y=request.getParameter("y");
 
-        if (x==null || y==null)
+        if (x==null)
         {
             response.setStatus(400);
-            return new TextStreamResponse("text/plain", "missing one or more arguments (need 'x' & 'y')");
+            return new TextStreamResponse("text/plain", "missing 'x' (via post variable)");
+        }
+
+        if (y==null)
+        {
+            response.setStatus(400);
+            return new TextStreamResponse("text/plain", "missing 'y' (via post variable)");
         }
 
         Blip blip=crossRoads.getOrCreateBlip(x);
