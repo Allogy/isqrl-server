@@ -37,6 +37,15 @@ public class QR
         return new TextStreamResponse("text/plain", "missing one or more arguments");
     }
 
+    Object onActivate(String special)
+    {
+        if (special.toLowerCase().startsWith("down"))
+        {
+            return qrDownStreamResponse();
+        }
+        return null;
+    }
+
     @InjectPage
     private Scan scan;
 
@@ -52,23 +61,7 @@ public class QR
 
     Object onActivate(String domainName, String hashY, String xAndFormat) throws WriterException, IOException
     {
-        if (QR_GENERATION_DOWN) return new StreamResponse()
-        {
-            public String getContentType()
-            {
-                return "image/png";
-            }
-
-            public InputStream getStream() throws IOException
-            {
-                return qrDownImage.getResource().openStream();
-            }
-
-            public void prepareResponse(Response response)
-            {
-                //You might think that we could ask them to cache it a while... but it won't help b/c the url changes constantly (it includes "x").
-            }
-        };
+        if (QR_GENERATION_DOWN) return qrDownStreamResponse();
 
         String imageFormat="png";
         String x=xAndFormat;
@@ -121,6 +114,28 @@ public class QR
             public void prepareResponse(Response response)
             {
                 //no-op...
+            }
+        };
+    }
+
+    private
+    StreamResponse qrDownStreamResponse()
+    {
+        return new StreamResponse()
+        {
+            public String getContentType()
+            {
+                return "image/png";
+            }
+
+            public InputStream getStream() throws IOException
+            {
+                return qrDownImage.getResource().openStream();
+            }
+
+            public void prepareResponse(Response response)
+            {
+                //You might think that we could ask them to cache it a while... but it won't help b/c the url changes constantly (it includes "x").
             }
         };
     }
