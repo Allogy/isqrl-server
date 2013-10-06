@@ -1,6 +1,7 @@
 package com.allogy.isqrl.pages;
 
 import com.allogy.isqrl.services.CrossRoads;
+import com.allogy.isqrl.services.IsqrlModule;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.util.TextStreamResponse;
 
@@ -19,6 +20,7 @@ public class Stats
         StringBuilder sb=new StringBuilder();
 
         sb.append("blips=").append(crossRoads.activeBlipCount()).append('\n');
+        sb.append("version=").append(IsqrlModule.VERSION).append('\n');
 
         return new TextStreamResponse("text/plain", sb.toString());
     }

@@ -97,9 +97,16 @@ public class CrossRoadsImpl implements CrossRoads
             }
         }
 
+        int active=map.size();
+
         if (numRemoved>0)
         {
-            log.debug("removed {} stale blips", numRemoved);
+            log.debug("{} blips on radar, after {} stale blips faded", active, numRemoved);
+        }
+        else
+        if (active>0)
+        {
+            log.debug("{} blips on radar", active);
         }
     }
 
