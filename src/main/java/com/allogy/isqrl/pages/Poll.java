@@ -27,6 +27,7 @@ public class Poll
      * This value should be long enough that the TCP/IP & HTTP overhead is small compared to the window of waiting, and that it will easily satisfy the stale blip value in CrossRoads.
      */
     private static final long STANDARD_POLLING_PERIOD_MS = TimeUnit.SECONDS.toMillis(7);
+    private static final String HTTP_MISSPELLED_REFERRER = "Referer";
 
     @Inject
     private CrossRoads crossRoads;
@@ -42,6 +43,9 @@ public class Poll
         if (hashY==null || x==null)
         {
             Thread.sleep(NO_THRASHING_DELAY_MS);
+
+            //Even the error messages won't get through without...
+            response.setHeader("Access-Control-Allow-Origin", "*");
             response.setStatus(400);
             return new TextStreamResponse("text/plain", "missing one or more arguments");
         }
@@ -56,6 +60,9 @@ public class Poll
 
     Object onActivate(String hashY, String x) throws InterruptedException
     {
+        //Even the error messages won't get through without...
+        response.setHeader("Access-Control-Allow-Origin", "*");
+
         if (ISQRL_DOWN)
         {
             //no sleep (consumes threads, which is probably what we are lacking in a down situation)
@@ -87,7 +94,7 @@ public class Poll
                 }
             }
 
-            String referrer = request.getHeader("Referrer");
+            String referrer = request.getHeader(HTTP_MISSPELLED_REFERRER);
             String domainName = DomainName.fromReferrer(referrer);
 
             log.trace("extract domain from referrer: '{}' -> '{}'", referrer, domainName);
