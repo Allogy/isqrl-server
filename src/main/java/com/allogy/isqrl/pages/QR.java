@@ -89,6 +89,8 @@ public class QR
 
         //BUG: not sure why the port number is leaking into the url here...
         url=url.replaceAll(":443/", "/");
+        //...probably the same reason it has the wrong protocol (reverse proxy)
+        url=url.replaceAll("http://", "https://");
 
         log.trace("encoding url as QR code: {}", url);
 
