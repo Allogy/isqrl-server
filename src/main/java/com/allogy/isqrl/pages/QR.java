@@ -87,11 +87,6 @@ public class QR
         scan.withDomainHashYAndX(domainName, hashY, x);
         String url=pageRenderLinkSource.createPageRenderLink(Scan.class).toAbsoluteURI();
 
-        //BUG: not sure why the port number is leaking into the url here...
-        url=url.replaceAll(":443/", "/");
-        //...probably the same reason it has the wrong protocol (reverse proxy)
-        url=url.replaceAll("http://", "https://");
-
         log.trace("encoding url as QR code: {}", url);
 
         final String finalImageFormat=imageFormat;
