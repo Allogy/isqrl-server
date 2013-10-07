@@ -72,7 +72,7 @@ public class Scan
     @Property
     private List<String> distrustCauses;
 
-    private int numPostSensitiveDistrustCauses;
+    private int cookieDependentCauses;
 
     Object onActivate(String cookieFilteringDomain, String hashY, String x)
     {
@@ -118,7 +118,7 @@ public class Scan
 
         //NB: the post-side of the equation needs a little help, as it is not fed any of the yummy cookies. So we must account for
         boolean isPostRequest=request.getMethod().equals("POST");
-        numPostSensitiveDistrustCauses=0;
+        cookieDependentCauses =0;
 
         if (blip.getDomainName()==null)
         {
@@ -146,7 +146,7 @@ public class Scan
             if (!isPostRequest)
             {
                 distrustCauses.add("You have not previously authenticated to this domain name.");
-                numPostSensitiveDistrustCauses++;
+                cookieDependentCauses++;
             }
         }
         else
@@ -167,7 +167,7 @@ public class Scan
             if (!isPostRequest)
             {
                 distrustCauses.add("No matching identity (on this device) was found, so you may be *creating* a new account (or hooking up with an existing one).");
-                numPostSensitiveDistrustCauses++;
+                cookieDependentCauses++;
             }
         }
         else
@@ -260,7 +260,7 @@ public class Scan
     public
     int getNumDistrustCauses()
     {
-        return distrustCauses.size()-numPostSensitiveDistrustCauses;
+        return distrustCauses.size()- cookieDependentCauses;
     }
 
     public
