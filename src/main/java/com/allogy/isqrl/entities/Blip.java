@@ -15,6 +15,7 @@ public final class Blip
 
     private String hashY;
 
+    volatile
     private String z;
 
     public
