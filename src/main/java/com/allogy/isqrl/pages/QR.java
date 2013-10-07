@@ -39,9 +39,16 @@ public class QR
 
     Object onActivate(String special)
     {
-        if (special.toLowerCase().startsWith("down"))
+        if (special.startsWith("down"))
         {
             return qrDownStreamResponse();
+        }
+        else
+        if (special.equals("mock"))
+        {
+            scan.withDomainHashYAndX("domain.name", "hashY", "x");
+            String url=pageRenderLinkSource.createPageRenderLink(Scan.class).toAbsoluteURI();
+            return new TextStreamResponse("text/plain", url);
         }
         return null;
     }

@@ -4,6 +4,7 @@ import com.allogy.isqrl.helpers.OutputStreamResponse;
 import com.allogy.isqrl.services.impl.CrossRoadsImpl;
 import com.allogy.isqrl.services.impl.RandomSourceImpl;
 import com.allogy.isqrl.services.impl.ServerSignatureImpl;
+import org.apache.tapestry5.MetaDataConstants;
 import org.apache.tapestry5.SymbolConstants;
 import org.apache.tapestry5.ioc.MappedConfiguration;
 import org.apache.tapestry5.ioc.ServiceBinder;
@@ -46,8 +47,22 @@ public class IsqrlModule
         // you can extend this list of locales (it's a comma separated series of locale names;
         // the first locale name is the default when there's no reasonable match).
         configuration.add(SymbolConstants.SUPPORTED_LOCALES, "en");
+
+        configuration.add(SymbolConstants.SECURE_ENABLED, "false");
     }
 
+    /**
+     * When in production mode, all pages & actions should be presumed as "secure" (using HTTPS).
+     * Otherwise, Tapestry will try and over think what pages should be secure.
+     *
+     * @url http://tapestry.apache.org/https.html
+     * @param configuration
+     */
+    public
+    void contributeMetaDataLocator(MappedConfiguration<String,String> configuration)
+    {
+        configuration.add(MetaDataConstants.SECURE_PAGE, "true");
+    }
 
     /**
      * This is a service definition, the service will be named "TimingFilter". The interface,
