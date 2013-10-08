@@ -5,7 +5,6 @@ import com.allogy.isqrl.helpers.DomainName;
 import com.allogy.isqrl.helpers.PollTime;
 import com.allogy.isqrl.services.CrossRoads;
 import org.apache.tapestry5.ioc.annotations.Inject;
-import org.apache.tapestry5.ioc.annotations.PostInjection;
 import org.apache.tapestry5.services.Request;
 import org.apache.tapestry5.services.Response;
 import org.apache.tapestry5.util.TextStreamResponse;
@@ -63,9 +62,14 @@ public class Poll
 
     private static final AtomicInteger numThreadsWaiting=new AtomicInteger(0);
 
-    @PostInjection
+    //@PostInjection does not work?
+    //@PostConstruct does not work?
+    /*
+    I'll just make it static...
     public
     void pageConstructed()
+    */
+    static
     {
         String numThreads=System.getProperty("ISQRL_MAX_POLLING_THREADS");
         if (numThreads==null)
@@ -96,7 +100,7 @@ public class Poll
         }
         if (staticWaitTime!=null)
         {
-            log.warn("using static wait time: {}ms", staticWaitTime);
+            //log.warn("using static wait time: {}ms", staticWaitTime);
             pollTime.setStaticWaitTime(Long.parseLong(staticWaitTime));
         }
     }
