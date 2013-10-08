@@ -2,14 +2,17 @@ package com.allogy.isqrl.pages;
 
 import com.allogy.isqrl.entities.Blip;
 import com.allogy.isqrl.helpers.DomainName;
+import com.allogy.isqrl.helpers.PollTime;
 import com.allogy.isqrl.services.CrossRoads;
 import org.apache.tapestry5.ioc.annotations.Inject;
+import org.apache.tapestry5.ioc.annotations.PostInjection;
 import org.apache.tapestry5.services.Request;
 import org.apache.tapestry5.services.Response;
 import org.apache.tapestry5.util.TextStreamResponse;
 import org.slf4j.Logger;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * User: robert
@@ -26,7 +29,7 @@ public class Poll
      * This value should be short enough that sane infrastructure would cut the line, nor that the user would notice if a funky web browser held the page open, etc.
      * This value should be long enough that the TCP/IP & HTTP overhead is small compared to the window of waiting, and that it will easily satisfy the stale blip value in CrossRoads.
      */
-    private static final long STANDARD_POLLING_PERIOD_MS = TimeUnit.SECONDS.toMillis(7);
+    private static final long MAX_POLLING_PERIOD_MS = TimeUnit.SECONDS.toMillis(7);
     private static final String HTTP_MISSPELLED_REFERRER = "Referer";
 
     @Inject
@@ -55,6 +58,48 @@ public class Poll
 
     private String hashY;
     private String x;
+
+    private static PollTime pollTime;
+
+    private static final AtomicInteger numThreadsWaiting=new AtomicInteger(0);
+
+    @PostInjection
+    public
+    void pageConstructed()
+    {
+        String numThreads=System.getProperty("ISQRL_MAX_POLLING_THREADS");
+        if (numThreads==null)
+        {
+            numThreads=System.getenv("ISQRL_MAX_POLLING_THREADS");
+        }
+        int maxTargetPollingThreads;
+        if (numThreads==null)
+        {
+            /*
+            I reluctantly set this default to 200, b/c Apache's default is 256 and Apache is very popular.
+            One might think, "you gotta leave some threads left"... in reality this only causes us to have
+            a zero-delay (no-wait) at that load.
+             */
+            maxTargetPollingThreads=256;
+        }
+        else
+        {
+            maxTargetPollingThreads=Integer.parseInt(numThreads);
+        }
+        pollTime=new PollTime(maxTargetPollingThreads, MAX_POLLING_PERIOD_MS);
+
+        //Used to test "fastest possible" & "highest load" (maximum wait)...
+        String staticWaitTime=System.getProperty("ISQRL_FIXED_WAIT_TIME");
+        if (staticWaitTime==null)
+        {
+            staticWaitTime=System.getenv("ISQRL_FIXED_WAIT_TIME");
+        }
+        if (staticWaitTime!=null)
+        {
+            log.warn("using static wait time: {}ms", staticWaitTime);
+            pollTime.setStaticWaitTime(Long.parseLong(staticWaitTime));
+        }
+    }
 
     private Blip blip;
 
@@ -133,17 +178,7 @@ public class Poll
          */
         if (!blip.isVoided())
         {
-            long wakeTime=System.currentTimeMillis()+STANDARD_POLLING_PERIOD_MS;
-
-            synchronized (blip)
-            {
-                while(blip.getZ()==null && !blip.isVoided())
-                {
-                    long timeToSleep=wakeTime-System.currentTimeMillis();
-                    if (timeToSleep<=0) break;
-                    blip.wait(timeToSleep);
-                }
-            }
+            maybeWaitForZToAppear(blip);
         }
 
         if (blip.isVoided())
@@ -166,6 +201,53 @@ public class Poll
         else
         {
             return new TextStreamResponse("application/json", "true");
+        }
+    }
+
+    private
+    void maybeWaitForZToAppear(final Blip blip) throws InterruptedException
+    {
+        /*
+        Dirty is fast (no contention), but not accurate (or atomic). The double-checking will
+        ensure that we will breeze right through if we are under high load. Remember, synchronizations
+        (and even to a lesser degree, the AtomicInteger functions) are *expensive* (esp. with multiple
+        processors).
+        */
+
+        int  dirtyNumThreads=numThreadsWaiting.get();
+        long dirtyWaitTime=pollTime.getMaxWaitTimeForNumberOfThreads(dirtyNumThreads);
+
+        if (dirtyWaitTime>0)
+        {
+            int numThreads=numThreadsWaiting.incrementAndGet();
+            try
+            {
+                long thisPollingPeriod=pollTime.getMaxWaitTimeForNumberOfThreads(numThreads);
+                long wakeTime=System.currentTimeMillis()+thisPollingPeriod;
+                //NB: thisPollingPeriod could still be < 0, putting wakeTime in the past (we'll just break out first go-around)
+
+                synchronized (blip)
+                {
+                    while(blip.getZ()==null && !blip.isVoided())
+                    {
+                        long timeToSleep=wakeTime-System.currentTimeMillis();
+                        if (timeToSleep<=0) break;
+                        blip.wait(timeToSleep);
+                    }
+                }
+            }
+            finally
+            {
+                numThreadsWaiting.getAndDecrement();
+            }
+        }
+        else
+        {
+                /*
+                Don't worry too much about skipping the synchronization block.
+                getZ() reads from a volatile so we won't get ever-stale processor
+                cache if the write happens off of "our" processor.
+                */
         }
     }
 

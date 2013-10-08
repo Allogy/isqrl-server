@@ -16,6 +16,8 @@ public class PollTime
 
     private final double slope;
 
+    private Long staticWaitTime;
+
     public
     PollTime(int maxThreads, long maxMilliseconds)
     {
@@ -27,6 +29,8 @@ public class PollTime
     public
     long getMaxWaitTimeForNumberOfThreads(int n)
     {
+        if (staticWaitTime!=null) return staticWaitTime;
+
         /*
         Ekk!!! Math!!! :-)
         Basically, we want longest-wait-time when we are idle, and zero-wait-time when we are at maximum capacity.
@@ -61,5 +65,11 @@ public class PollTime
             long milliseconds=p.getMaxWaitTimeForNumberOfThreads(numThreads);
             System.out.println(String.format("%10d -> %d", numThreads, milliseconds));
         }
+    }
+
+    public
+    void setStaticWaitTime(long l)
+    {
+        staticWaitTime=l;
     }
 }
