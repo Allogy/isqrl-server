@@ -150,8 +150,9 @@ public class Scan
             this.subDomainOf=blip.getFullDomainName();
         }
         else
+        if (!blip.isVoided())
         {
-            distrustCauses.add("The site may not be configured correctly (or be spoofed), as the domain names do not match. The QR code says '"+cookieFilteringDomain+"', but the backend says '"+blip.getFullDomainName()+"'.");
+            blip.setVoidMessage("The site may not be configured correctly (or may be spoofed), as the domain names do not match. The QR code says '"+cookieFilteringDomain+"', but the backend says '"+blip.getFullDomainName()+"'.");
         }
 
         if (blip.getHashZ()!=null && !blip.isVoided())
