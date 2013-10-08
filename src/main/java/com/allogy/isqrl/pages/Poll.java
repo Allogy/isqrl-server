@@ -150,17 +150,17 @@ public class Poll
                 return new TextStreamResponse("text/plain", "invalid or missing referrer header");
             }
             else
-            if (blip.getDomainName()==null)
+            if (blip.getFullDomainName()==null)
             {
                 //Signals a late initial poll(), or a sub-millisecond-eager snap() request... I suppose.
                 synchronized (blip)
                 {
-                    blip.setDomainName(domainName);
+                    blip.setFullDomainName(domainName);
                     blip.notifyAll();
                 }
             }
             else
-            if (!blip.getDomainName().equals(domainName))
+            if (!blip.getFullDomainName().equals(domainName))
             {
                 if (LOW_MEMORY_MODE)
                 {
@@ -168,7 +168,7 @@ public class Poll
                 }
                 else
                 {
-                    blip.setVoidMessage("blip had domain name of '"+blip.getDomainName()+"', but was then accessed by '"+domainName+"'");
+                    blip.setVoidMessage("blip had domain name of '"+blip.getFullDomainName()+"', but was then accessed by '"+domainName+"'");
                 }
             }
         }

@@ -11,7 +11,7 @@ public final class Blip
 
     private long activityTime;
     private String voidMessage;
-    private String domainName;
+    private String fullDomainName;
 
     private String hashY;
 
@@ -60,14 +60,14 @@ public final class Blip
         this.z = z;
     }
 
-    public String getDomainName()
+    public String getFullDomainName()
     {
-        return domainName;
+        return fullDomainName;
     }
 
-    public void setDomainName(String domainName)
+    public void setFullDomainName(String fullDomainName)
     {
-        this.domainName = domainName;
+        this.fullDomainName = fullDomainName;
     }
 
     public String getVoidMessage()

@@ -58,7 +58,7 @@
 </style>
 
 	<div class="centeringContainer">
-		<h2 class="domainName ${trueBlue}">${blip.domainName}</h2>
+		<h2 class="domainName ${trueBlue}">${blip.fullDomainName}</h2>
 	</div>
 
 <t:if test="distrustCauses.empty">

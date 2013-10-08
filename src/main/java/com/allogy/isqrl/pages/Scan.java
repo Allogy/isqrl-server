@@ -108,7 +108,7 @@ public class Scan
         * /
         synchronized (blip)
         {
-            if (blip.getDomainName()==null)
+            if (blip.getFullDomainName()==null)
             {
                 blip.wait(2000);
                 //NB: could *still* be null!
@@ -120,7 +120,7 @@ public class Scan
         boolean isPostRequest=request.getMethod().equals("POST");
         cookieDependentCauses =0;
 
-        if (blip.getDomainName()==null)
+        if (blip.getFullDomainName()==null)
         {
             if (!blip.isVoided())
             {
@@ -137,7 +137,7 @@ public class Scan
             blip.setVoidMessage("It looks like somebody else may have seen this qr code, if you hit the back button... then maybe it was you?!?!?!");
         }
 
-        String previousHashY=cookies.readCookieValue(CookieName.forDomainTrust(blip.getDomainName()));
+        String previousHashY=cookies.readCookieValue(CookieName.forDomainTrust(blip.getFullDomainName()));
 
         distrustCauses=new ArrayList<String>();
 
@@ -155,12 +155,12 @@ public class Scan
             distrustCauses.add("The sites identity seems to have changed; it was '"+previousHashY+"', but is now '"+hashY+"'.");
         }
 
-        if (!blip.getDomainName().equals(cookieFilteringDomain))
+        if (!blip.getFullDomainName().equals(cookieFilteringDomain))
         {
-            distrustCauses.add("The site may not be configured correctly (or be spoofed), as the domain names do not match. The QR code says '"+cookieFilteringDomain+"', but the backend says '"+blip.getDomainName()+"'.");
+            distrustCauses.add("The site may not be configured correctly (or be spoofed), as the domain names do not match. The QR code says '"+cookieFilteringDomain+"', but the backend says '"+blip.getFullDomainName()+"'.");
         }
 
-        String signedZCookie=cookies.readCookieValue(CookieName.forZValue(blip.getDomainName(), USER_NUMBER));
+        String signedZCookie=cookies.readCookieValue(CookieName.forZValue(blip.getFullDomainName(), USER_NUMBER));
 
         if (signedZCookie==null)
         {
@@ -316,7 +316,7 @@ public class Scan
         --
         TODO: IMO it would be better to ban the root domain (and warn all subs), not a specific subdomain (they are then free to use any other subdomain).
          */
-        String domainName=blip.getDomainName();
+        String domainName=blip.getFullDomainName();
         String cookieName=CookieName.forDomainTrust(domainName);
         String cookieValue=messages.format("blacklisted-on", new Date());
         setPathLimitedCookie(cookieName, cookieValue);
@@ -327,7 +327,7 @@ public class Scan
     public
     String getUnvalidatedZValue()
     {
-        String domainName=blip.getDomainName(); //???: or... cookieFilteringDomain ???? When are they not equal?
+        String domainName=blip.getFullDomainName(); //???: or... cookieFilteringDomain ???? When are they not equal?
         String zCookieName=CookieName.forZValue(domainName, USER_NUMBER);
         String signedZ=cookies.readCookieValue(zCookieName);
 
@@ -372,7 +372,7 @@ public class Scan
             return new TextStreamResponse("text/plain", messages.format("race-then-now", oldNumDistrustCauses, distrustCauses.size()));
         }
 
-        String domainName=blip.getDomainName(); //???: or... cookieFilteringDomain ???? When are they not equal?
+        String domainName=blip.getFullDomainName(); //???: or... cookieFilteringDomain ???? When are they not equal?
         String zCookieName=CookieName.forZValue(domainName, USER_NUMBER);
         String signedZ=serverSignature.prependSignature(z);
 
