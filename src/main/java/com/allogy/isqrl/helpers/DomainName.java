@@ -57,4 +57,15 @@ public class DomainName
     }
 
     private DomainName(){}
+
+    public static
+    boolean isSubdomainOf(String subDomain, String higherDomain)
+    {
+        //Prevent matching top level domains (e.g. if they claim a domain of "com")
+        //Not that it would hurt, I suppose... just wouldn't be useful (bad reporting to user).
+        if (higherDomain.indexOf('.')<=0) return false;
+
+        //e.g. "www.apple.com".endsWith("apple.com") -> true
+        return subDomain.toLowerCase().endsWith(higherDomain.toLowerCase());
+    }
 }

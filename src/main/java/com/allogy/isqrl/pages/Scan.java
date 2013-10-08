@@ -2,6 +2,7 @@ package com.allogy.isqrl.pages;
 
 import com.allogy.isqrl.entities.Blip;
 import com.allogy.isqrl.helpers.CookieName;
+import com.allogy.isqrl.helpers.DomainName;
 import com.allogy.isqrl.services.CrossRoads;
 import com.allogy.isqrl.services.ServerSignature;
 import org.apache.tapestry5.SymbolConstants;
@@ -54,9 +55,12 @@ public class Scan
     @Property
     private Blip blip;
 
+    @Property
+    private String subDomainOf;
+
     Object onActivate()
     {
-        if (cookieFilteringDomain==null || hashY==null || x==null)
+        if (possiblySuperDomain ==null || hashY==null || x==null)
         {
             response.setStatus(400);
             return new TextStreamResponse("text/plain", "missing one or more arguments");
@@ -65,7 +69,9 @@ public class Scan
         return null;
     }
 
-    private String cookieFilteringDomain;
+    @Property
+    private String possiblySuperDomain;
+
     private String hashY;
     private String x;
 
@@ -76,12 +82,12 @@ public class Scan
 
     Object onActivate(String cookieFilteringDomain, String hashY, String x)
     {
-        this.cookieFilteringDomain=cookieFilteringDomain;
+        this.possiblySuperDomain=cookieFilteringDomain;
         this.hashY=hashY;
         this.x=x;
 
         /*
-        "cookieFilteringDomain" must be the first parameter (and is added so that) we can restrict the
+        "possiblySuperDomain" must be the first parameter (and is added so that) we can restrict the
         set of cookies we receive from the client. This is important so that we don't get a million
         cookies sent for "all the sites you visit" for every request. That would be a huge scalability
         issue.
@@ -132,6 +138,20 @@ public class Scan
             return new TextStreamResponse("text/plain", "invalid authentication ticket, or slow-auth-server race condition");
         }
 
+        if (blip.getFullDomainName().equals(cookieFilteringDomain))
+        {
+            this.subDomainOf=null;
+        }
+        else
+        if (DomainName.isSubdomainOf(blip.getFullDomainName(), possiblySuperDomain))
+        {
+            this.subDomainOf=blip.getFullDomainName();
+        }
+        else
+        {
+            distrustCauses.add("The site may not be configured correctly (or be spoofed), as the domain names do not match. The QR code says '"+cookieFilteringDomain+"', but the backend says '"+blip.getFullDomainName()+"'.");
+        }
+
         if (blip.getZ()!=null && !blip.isVoided())
         {
             blip.setVoidMessage("It looks like somebody else may have seen this qr code, if you hit the back button... then maybe it was you?!?!?!");
@@ -153,11 +173,6 @@ public class Scan
         if (!previousHashY.equals(hashY))
         {
             distrustCauses.add("The sites identity seems to have changed; it was '"+previousHashY+"', but is now '"+hashY+"'.");
-        }
-
-        if (!blip.getFullDomainName().equals(cookieFilteringDomain))
-        {
-            distrustCauses.add("The site may not be configured correctly (or be spoofed), as the domain names do not match. The QR code says '"+cookieFilteringDomain+"', but the backend says '"+blip.getFullDomainName()+"'.");
         }
 
         String signedZCookie=cookies.readCookieValue(CookieName.forZValue(blip.getFullDomainName(), USER_NUMBER));
@@ -210,7 +225,7 @@ public class Scan
     private
     void setPathLimitedCookie(String name, String value)
     {
-        String path=request.getContextPath()+"/scan/"+cookieFilteringDomain+"/";
+        String path=request.getContextPath()+"/scan/"+ possiblySuperDomain +"/";
 
         //cookies.writeDomainCookieValue(name, value, path, domain, LONG_COOKIE_LIFETIME); ???
         //We have to compose the cookie ourself or else we could change the symbol: "tapestry.default-cookie-max-age"
@@ -230,7 +245,7 @@ public class Scan
     public
     void withDomainHashYAndX(String domain, String hashY, String x)
     {
-        this.cookieFilteringDomain=domain;
+        this.possiblySuperDomain =domain;
         this.hashY=hashY;
         this.x=x;
     }
@@ -251,7 +266,7 @@ public class Scan
     String[] onPassivate()
     {
         return new String[]{
-                cookieFilteringDomain,
+                possiblySuperDomain,
                 hashY,
                 x
         };
@@ -327,7 +342,7 @@ public class Scan
     public
     String getUnvalidatedZValue()
     {
-        String domainName=blip.getFullDomainName(); //???: or... cookieFilteringDomain ???? When are they not equal?
+        String domainName=blip.getFullDomainName(); //???: or... possiblySuperDomain ???? When are they not equal?
         String zCookieName=CookieName.forZValue(domainName, USER_NUMBER);
         String signedZ=cookies.readCookieValue(zCookieName);
 
@@ -372,7 +387,7 @@ public class Scan
             return new TextStreamResponse("text/plain", messages.format("race-then-now", oldNumDistrustCauses, distrustCauses.size()));
         }
 
-        String domainName=blip.getFullDomainName(); //???: or... cookieFilteringDomain ???? When are they not equal?
+        String domainName= possiblySuperDomain;
         String zCookieName=CookieName.forZValue(domainName, USER_NUMBER);
         String signedZ=serverSignature.prependSignature(z);
 
@@ -390,6 +405,19 @@ public class Scan
         setPathLimitedCookie(zCookieName, signedZ);
 
         return Done.class;
+    }
+
+    public
+    String getSubDomainMessage()
+    {
+        if (subDomainOf!=null)
+        {
+            return messages.format("sub-domain-of", subDomainOf);
+        }
+        else
+        {
+            return "";
+        }
     }
 
 }

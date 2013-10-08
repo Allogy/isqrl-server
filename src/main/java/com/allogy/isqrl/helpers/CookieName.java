@@ -12,7 +12,7 @@ public class CookieName
     public static
     String forDomainTrust(String domainName)
     {
-        return "isqrl-hy-"+domainName;
+        return "isqrl-hy-"+domainName.toLowerCase();
     }
 
     /**
@@ -25,7 +25,7 @@ public class CookieName
     public static
     String forZValue(String domainName, int id_number)
     {
-        return "isqrl-z-"+domainName+"-"+id_number;
+        return "isqrl-z-"+domainName.toLowerCase()+"-"+id_number;
     }
 
     private CookieName() {}

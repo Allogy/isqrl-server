@@ -55,10 +55,16 @@
 	text-align: center;
 	width: 100%;
 }
+.viaSubDomain
+{
+	color: gray;
+	font-weight: normal;
+}
 </style>
 
 	<div class="centeringContainer">
-		<h2 class="domainName ${trueBlue}">${blip.fullDomainName}</h2>
+		<h2 class="domainName ${trueBlue}">${possiblySuperDomain}</h2>
+		<h3 class="viaSubDomain">${subDomainMessage}</h3>
 	</div>
 
 <t:if test="distrustCauses.empty">
