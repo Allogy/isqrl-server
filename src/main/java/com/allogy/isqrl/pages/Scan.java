@@ -157,7 +157,7 @@ public class Scan
             blip.setVoidMessage("It looks like somebody else may have seen this qr code, if you hit the back button... then maybe it was you?!?!?!");
         }
 
-        String previousHashY=cookies.readCookieValue(CookieName.forDomainTrust(blip.getFullDomainName()));
+        String previousHashY=cookies.readCookieValue(CookieName.forDomainTrust(possiblySuperDomain));
 
         distrustCauses=new ArrayList<String>();
 
@@ -175,7 +175,7 @@ public class Scan
             distrustCauses.add("The sites identity seems to have changed; it was '"+previousHashY+"', but is now '"+hashY+"'.");
         }
 
-        String signedZCookie=cookies.readCookieValue(CookieName.forZValue(blip.getFullDomainName(), USER_NUMBER));
+        String signedZCookie=cookies.readCookieValue(CookieName.forZValue(possiblySuperDomain, USER_NUMBER));
 
         if (signedZCookie==null)
         {
