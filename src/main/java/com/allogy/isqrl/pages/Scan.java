@@ -138,6 +138,8 @@ public class Scan
             return new TextStreamResponse("text/plain", "invalid authentication ticket, or slow-auth-server race condition");
         }
 
+        distrustCauses=new ArrayList<String>();
+
         if (blip.getFullDomainName().equals(cookieFilteringDomain))
         {
             this.subDomainOf=null;
@@ -158,8 +160,6 @@ public class Scan
         }
 
         String previousHashY=cookies.readCookieValue(CookieName.forDomainTrust(possiblySuperDomain));
-
-        distrustCauses=new ArrayList<String>();
 
         if (previousHashY==null)
         {
@@ -342,7 +342,7 @@ public class Scan
     public
     String getUnvalidatedZValue()
     {
-        String domainName=blip.getFullDomainName(); //???: or... possiblySuperDomain ???? When are they not equal?
+        String domainName=possiblySuperDomain;
         String zCookieName=CookieName.forZValue(domainName, USER_NUMBER);
         String signedZ=cookies.readCookieValue(zCookieName);
 
@@ -410,7 +410,7 @@ public class Scan
 
         synchronized (blip)
         {
-            blip.setHashZ(z);
+            blip.setHashZ(hashedZ);
             blip.notifyAll();
         }
 
