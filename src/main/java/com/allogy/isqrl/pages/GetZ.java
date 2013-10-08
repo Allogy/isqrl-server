@@ -61,7 +61,7 @@ public class GetZ
             return new TextStreamResponse("text/plain", "invalid 'y' value: hashY must equal sha1(y), check for trailing line endings");
         }
 
-        String z=blip.getZ();
+        String z=blip.getHashZ();
 
         if (z==null)
         {

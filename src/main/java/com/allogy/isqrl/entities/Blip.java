@@ -16,7 +16,7 @@ public final class Blip
     private String hashY;
 
     volatile
-    private String z;
+    private String hashZ;
 
     public
     Blip(String x)
@@ -50,14 +50,14 @@ public final class Blip
         return x;
     }
 
-    public String getZ()
+    public String getHashZ()
     {
-        return z;
+        return hashZ;
     }
 
-    public void setZ(String z)
+    public void setHashZ(String hashZ)
     {
-        this.z = z;
+        this.hashZ = hashZ;
     }
 
     public String getFullDomainName()

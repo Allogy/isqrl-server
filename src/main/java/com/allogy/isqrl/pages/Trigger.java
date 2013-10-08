@@ -25,14 +25,14 @@ public class Trigger
 
         synchronized (blip)
         {
-            if (blip.getZ()==null)
+            if (blip.getHashZ()==null)
             {
-                blip.setZ("zzzzzzzzzzzzzzzz");
+                blip.setHashZ("zzzzzzzzzzzzzzzz");
                 what="triggered\n";
             }
             else
             {
-                blip.setZ(null);
+                blip.setHashZ(null);
                 what="reset\n";
             }
             blip.notifyAll();

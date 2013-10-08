@@ -152,7 +152,7 @@ public class Scan
             distrustCauses.add("The site may not be configured correctly (or be spoofed), as the domain names do not match. The QR code says '"+cookieFilteringDomain+"', but the backend says '"+blip.getFullDomainName()+"'.");
         }
 
-        if (blip.getZ()!=null && !blip.isVoided())
+        if (blip.getHashZ()!=null && !blip.isVoided())
         {
             blip.setVoidMessage("It looks like somebody else may have seen this qr code, if you hit the back button... then maybe it was you?!?!?!");
         }
@@ -391,9 +391,26 @@ public class Scan
         String zCookieName=CookieName.forZValue(domainName, USER_NUMBER);
         String signedZ=serverSignature.prependSignature(z);
 
+        /*
+         * It is no small debate as to if we should return Z plain (as if a password) or not...
+         * Implementers are unlikely to treat Z as a password (hash/salt, etc), but if they
+         * don't then Z is leaving our service in a state that is sufficient (if intercepted) to
+         * be sufficient to authenticate.
+         *
+         * So too we thought to hash this a thousand times (or the like), but pause at this
+         * stop-gap authentication solution degrading to a hashing service.
+         *
+         * What's more, it may be important for migration purposes (to full-SQRL) that this
+         * algorithim be well known, or that a sys-admin be able to quickly convert cookies
+         * (or the like).
+         *
+         * All things considered, we opt to just do a single round of sha-1.
+         */
+        String hashedZ=serverSignature.sha1HexOf(z);
+
         synchronized (blip)
         {
-            blip.setZ(z);
+            blip.setHashZ(z);
             blip.notifyAll();
         }
 

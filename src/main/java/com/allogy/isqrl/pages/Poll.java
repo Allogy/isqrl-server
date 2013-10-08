@@ -198,7 +198,7 @@ public class Poll
             }
         }
 
-        if (blip.getZ()==null)
+        if (blip.getHashZ()==null)
         {
             return new TextStreamResponse("application/json", "false");
         }
@@ -232,7 +232,7 @@ public class Poll
 
                 synchronized (blip)
                 {
-                    while(blip.getZ()==null && !blip.isVoided())
+                    while(blip.getHashZ()==null && !blip.isVoided())
                     {
                         long timeToSleep=wakeTime-System.currentTimeMillis();
                         if (timeToSleep<=0) break;
