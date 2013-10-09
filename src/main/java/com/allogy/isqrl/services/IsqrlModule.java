@@ -2,14 +2,17 @@ package com.allogy.isqrl.services;
 
 import com.allogy.isqrl.helpers.OutputStreamResponse;
 import com.allogy.isqrl.services.impl.CrossRoadsImpl;
+import com.allogy.isqrl.services.impl.DefaultJavaScriptAndCssCensor;
 import com.allogy.isqrl.services.impl.RandomSourceImpl;
 import com.allogy.isqrl.services.impl.ServerSignatureImpl;
 import org.apache.tapestry5.MetaDataConstants;
 import org.apache.tapestry5.SymbolConstants;
 import org.apache.tapestry5.ioc.MappedConfiguration;
 import org.apache.tapestry5.ioc.ServiceBinder;
+import org.apache.tapestry5.ioc.annotations.Decorate;
 import org.apache.tapestry5.services.ComponentEventResultProcessor;
 import org.apache.tapestry5.services.Response;
+import org.apache.tapestry5.services.javascript.JavaScriptStackSource;
 
 /**
  * This module is automatically included as part of the Tapestry IoC Registry, it's a good place to
@@ -49,6 +52,8 @@ public class IsqrlModule
         configuration.add(SymbolConstants.SUPPORTED_LOCALES, "en");
 
         configuration.add(SymbolConstants.SECURE_ENABLED, "false");
+
+        configuration.add(SymbolConstants.DEFAULT_STYLESHEET, "context:main.css");
     }
 
     /**
@@ -58,7 +63,7 @@ public class IsqrlModule
      * @url http://tapestry.apache.org/https.html
      * @param configuration
      */
-    public
+    public static
     void contributeMetaDataLocator(MappedConfiguration<String,String> configuration)
     {
         configuration.add(MetaDataConstants.SECURE_PAGE, "true");
@@ -134,8 +139,16 @@ public class IsqrlModule
      * @param response the response that the event result processor handles
      * @url http://wiki.apache.org/tapestry/Tapestry5HowToCreateAComponentEventResultProcessor
      */
-    public void contributeComponentEventResultProcessor(MappedConfiguration<Class<?>, ComponentEventResultProcessor<?>> configuration, Response response)
+    public static
+    void contributeComponentEventResultProcessor(MappedConfiguration<Class<?>, ComponentEventResultProcessor<?>> configuration, Response response)
     {
         configuration.add(OutputStreamResponse.class, new OutputStreamResponseResultProcessor(response));
+    }
+
+    @Decorate(serviceInterface = JavaScriptStackSource.class)
+    public static
+    JavaScriptStackSource decorateJavaScriptStackSource(JavaScriptStackSource original)
+    {
+        return new DefaultJavaScriptAndCssCensor(original);
     }
 }
