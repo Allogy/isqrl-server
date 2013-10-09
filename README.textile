@@ -1,0 +1,65 @@
+
+h1. iSQRL
+
+iSQRL
+(pronounced: eye-squirrel)
+
+Is an acronym for:
+<pre>
+incomplete
+Secure
+Quick
+Reference
+Login
+</pre>
+
+...and is an authentication system similar to that of "SQRL":https://grc.com/sqrl/sqrl.htm (by Steve Gibson) and is intended to be a stop-gap solution for those wanting & waiting for SQRL to become a reality, while simultaneously providing reusable server-side components that may be useful in the final/reference implementation of SQRL.
+
+Steve Gibson's Opinion on iSQRL:
+* ...will be placed here if & when he renders one.
+
+Advantages:
+* works now
+** lets leading-edge sites deploy qr logins
+** lets users get accustomed to scanning a qr code for authentication
+** gives the SQRL crowd a proof-of-concept that they can use & demonstrate to others
+** lets sqrl mature in peace & standardize as necessary at a less-than-frantic pace (often crypto must be right the first time or everything breaks)
+** To quote Steve (and many others): "I want this NOW!"
+* does not need a specialized mobile app (b/c the qr code points to an HTTPS service, and the authentication credentials are stored in the phone's browser)
+* backend may be reusable in completing the SQRL implementation
+** as there must be a server-side component anyway, and it solves the interesting problem of connecting the two sessions in a scalable way)
+
+As a fore-runner:
+* has built-in resistance to swapped-qr-code attack due to use of 'referer' header (makes the attack harder, but not impossible)
+* addresses the issue of subdomains, which may or may not be welcome (see [[Subdomains]])
+* particularly if isqrl becomes popular, there may be a way to translate isqrl accounts into sqrl-managed accounts, but not without special support and consideration from both projects (e.g. a <a href"Port to SQRL"
+
+Disadvantages (inherent):
+* cookies are stored unencrypted in the smartphone's browser
+* there is no public key cryptography (only standard SSL/HTTPS & sha1 hashing for challenge-and-response mechanisms)
+* credentials work much like server-hashed passwords (try searching for "shared secrets" at grc's sqrl site)
+* many researchers shy away from new uses of the sha1 hash function (see [[Why sha1?]])
+
+Disadvantages which may be addressed in a later version:
+* no persistence or transferring (unless you manually copy your cookies over), which necessitates that...
+* clearing your browsers cookie cache will likely nuke all your identities
+* no "master key" storage reduction, so the amount of data on your phone scales up with the number of websites you visit
+* no present "tap the qr code on the phone" support
+
+Seeming disadvantages:
+* Contrary to the pure "no third party involvement" ideal, this mechanism relies on a service separate from the webapp. In theory, anyone can setup such a service using code from this repository. However, seeing the degree of logic required to implemented this SQRL-like mechanism, we are confident that (even with SQRL) webmasters of common websites (e.g. that serve up PHP pages) may not have the level of compute service required to complete such a mechanism in a scalable way (see: [[Can't you use a database?]]).
+
+How does it work:
+* There is an interaction diagram in the /docs directory...
+* The code is here... see for yourself!
+
+Can I see it work?
+* "Single domain (1)":http://poc1.isqrl.allogy.com/
+* "This domain(2)":http://poc2.isqrl.allogy.com/ and "that domain(3)":http://poc3.isqrl.allogy.com/ use the same super-domain (and therefore can see each other's credentials)
+* "This domain(4)":http://poc4.isqrl.allogy.com/ is "misconfigured" to try and get your credentials from a 3rd party (otherdomain.com)
+
+How I do this on my website?
+* Instructions or tutorial coming soon
+* outside of what is visible on the proof-of-concept pages, the only thing you should need to replicate this is in the /contrib directory (currently PHP-only, ports to other languages & frameworks are welcome)
+
+
