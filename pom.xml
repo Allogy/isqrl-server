@@ -4,11 +4,11 @@
 
     <groupId>com.allogy.isqrl</groupId>
     <artifactId>isqrl</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.3</version>
 
     <packaging>war</packaging>
 
-    <name>isqrl Tapestry 5 Application</name>
+    <name>iSQRL QR-Code Authentication Mechanism Web Service</name>
         <dependencies>
 
             <dependency>

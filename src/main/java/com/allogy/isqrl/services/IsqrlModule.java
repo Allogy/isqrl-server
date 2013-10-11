@@ -20,7 +20,7 @@ import org.apache.tapestry5.services.javascript.JavaScriptStackSource;
  */
 public class IsqrlModule
 {
-    public static final String VERSION="0.2-SNAPSHOT";
+    public static final String VERSION="0.3";
 
     public static void bind(ServiceBinder binder)
     {
