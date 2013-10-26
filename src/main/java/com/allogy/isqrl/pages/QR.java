@@ -29,6 +29,7 @@ public class QR
 {
     private static final boolean QR_GENERATION_DOWN=Boolean.getBoolean("ISQRL_DOWN") || "true".equals(System.getenv("ISQRL_DOWN"));
 
+    @Inject
     private Response response;
 
     Object onActivate()
