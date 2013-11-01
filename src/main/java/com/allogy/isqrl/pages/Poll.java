@@ -238,6 +238,8 @@ public class Poll
                         if (timeToSleep<=0) break;
                         blip.wait(timeToSleep);
                     }
+                    //If we've waited at all, let's advance the relevance timer...
+                    blip.setActivityTime(System.currentTimeMillis());
                 }
             }
             finally
