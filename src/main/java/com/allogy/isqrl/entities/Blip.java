@@ -18,6 +18,9 @@ public final class Blip
     volatile
     private String hashZ;
 
+    volatile
+    private boolean viaPut;
+
     public
     Blip(String x)
     {
@@ -55,9 +58,10 @@ public final class Blip
         return hashZ;
     }
 
-    public void setHashZ(String hashZ)
+    public void setHashZ(String hashZ, boolean viaPut)
     {
         this.hashZ = hashZ;
+        this.viaPut = viaPut;
     }
 
     public String getFullDomainName()
@@ -108,5 +112,10 @@ public final class Blip
     public void setHashY(String hashY)
     {
         this.hashY = hashY;
+    }
+
+    public boolean isViaPut()
+    {
+        return viaPut;
     }
 }

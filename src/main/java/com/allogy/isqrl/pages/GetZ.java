@@ -33,6 +33,8 @@ public class GetZ
     @Inject
     private ServerSignature serverSignature;
 
+    private boolean acceptZValuesFromPuts;
+
     Object onActivate()
     {
         String x=request.getParameter("x");
@@ -69,6 +71,17 @@ public class GetZ
             return new TextStreamResponse("text/plain", "'x' and 'y' are correct, but the 'z' value has not appeared... did your poll() call really return 'true'?");
         }
 
+        if (acceptZValuesFromPuts)
+        {
+            log.debug("acceptZValuesFromPuts=true");
+        }
+        else
+        if (blip.isViaPut())
+        {
+            response.setStatus(400);
+            return new TextStreamResponse("text/plain", "the requested z-value was provided by a direct put-z request, add 'true' parameter to allow this behavior");
+        }
+
         if (LOW_MEMORY_MODE)
         {
             crossRoads.remove(blip);
@@ -79,4 +92,8 @@ public class GetZ
         return new TextStreamResponse("text/plain", z);
     }
 
+    void onActivate(boolean acceptZValuesFromPuts)
+    {
+        this.acceptZValuesFromPuts=acceptZValuesFromPuts;
+    }
 }

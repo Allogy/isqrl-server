@@ -411,7 +411,7 @@ public class Scan
 
         synchronized (blip)
         {
-            blip.setHashZ(hashedZ);
+            blip.setHashZ(hashedZ, false);
             blip.notifyAll();
         }
 

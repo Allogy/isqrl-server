@@ -29,7 +29,7 @@ public class Poll
      * This value should be long enough that the TCP/IP & HTTP overhead is small compared to the window of waiting, and that it will easily satisfy the stale blip value in CrossRoads.
      */
     private static final long MAX_POLLING_PERIOD_MS = TimeUnit.SECONDS.toMillis(7);
-    private static final String HTTP_MISSPELLED_REFERRER = "Referer";
+    public static final String HTTP_MISSPELLED_REFERRER = "Referer";
 
     @Inject
     private CrossRoads crossRoads;
